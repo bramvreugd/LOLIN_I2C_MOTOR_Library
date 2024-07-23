@@ -1,4 +1,4 @@
-# Arduino library for the new LOLIN I2C MOTOR Shiled
+# Arduino library for the new LOLIN I2C MOTOR Shield
 ### Installation
 - Clone this repository into Arduino/libraries
 
