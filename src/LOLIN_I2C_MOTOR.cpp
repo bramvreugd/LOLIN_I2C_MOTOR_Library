@@ -3,10 +3,15 @@
 /* 
 	Init
 */
-LOLIN_I2C_MOTOR::LOLIN_I2C_MOTOR(uint8_t address)
+ boolean LOLIN_I2C_MOTOR::begin(uint8_t address,TwoWire *i2c)
 {
-	Wire.begin();
+	i2c->begin();
 	_address = address;
+  Serial.print("begin adr");
+  Serial.println(_address);
+	
+  
+	return 0;
 }
 
 /*
@@ -19,7 +24,7 @@ LOLIN_I2C_MOTOR::LOLIN_I2C_MOTOR(uint8_t address)
 		
 		sta: Motor Status
 				MOTOR_STATUS_STOP
-  				MOTOR_STATUS_CCW
+  			MOTOR_STATUS_CCW
 				MOTOR_STATUS_CW
 				MOTOR_STATUS_SHORT_BRAKE
 				MOTOR_STATUS_STANDBY
@@ -137,33 +142,60 @@ unsigned char LOLIN_I2C_MOTOR::getInfo(void)
 unsigned char LOLIN_I2C_MOTOR::sendData(unsigned char *data, unsigned char len)
 {
 	unsigned char i;
-
+  Serial.print("Senddata adr");
+  Serial.print(_address);
 	if ((_address == 0) || (_address >= 127))
 	{
-		return 1;
+    Serial.println("");
+		return I2C_MOTOR_WRONGADR;
 	}
 	else
 	{
-
+    Serial.print(" ");  
+    Serial.print(len);
+    Serial.print(" ");
 		Wire.beginTransmission(_address);
-		for (i = 0; i < len; i++)
+		for (i = 0; i < len; i++){
 			Wire.write(data[i]);
-		Wire.endTransmission();
-		delay(50);
+      Serial.print(data[i]);
+      Serial.print(",");
+    }
+    int res=Wire.endTransmission();
+    if(res!=0){
+       Serial.print("Error lolin");
+       Serial.println(res);
+       return res;
+    }
 
 		if (data[0] == GET_SLAVE_STATUS)
-			Wire.requestFrom(_address, 2);
+			Wire.requestFrom((int)_address, 2);
 		else
-			Wire.requestFrom(_address, 1);
-
+			Wire.requestFrom((int)_address, 1);
+    
+    i = 0;
+    while (!Wire.available() && i++<200) {
+      delay(1);
+    }
 		i = 0;
+    Serial.print("r");
 
-		while (Wire.available())
+		while (Wire.available() && i<2)
 		{
 			get_data[i] = Wire.read();
+      Serial.print(get_data[i]); 
 			i++;
 		}
-
+    if((data[0] == GET_SLAVE_STATUS && i<2) || i<1) {
+       Serial.print("Error lolin no response");
+       Serial.println(i);
+       return I2C_MOTOR_MISSINGDATA;
+     }
+    if(data[0] != GET_SLAVE_STATUS){
+        if(get_data[i] !=1){
+           return I2C_MOTOR_BADRESPONSE;
+        }
+    } 
+    Serial.println("");
 		return 0;
 	}
 }
