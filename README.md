@@ -1,6 +1,6 @@
 # Arduino library for the new LOLIN I2C MOTOR Shiled
 ### Installation
-- Clone this repository  or download&unzip [zip file](https://github.com/wemos/LOLIN_I2C_MOTOR_Library/archive/master.zip) into Arduino/libraries
+- Clone this repository into Arduino/libraries
 
 Bram Vreugdenhil added.
 - Error checking. Checking I2c response and motor shield response.
